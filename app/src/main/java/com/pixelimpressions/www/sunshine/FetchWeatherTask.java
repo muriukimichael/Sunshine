@@ -11,7 +11,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
+import com.pixelimpressions.www.sunshine.data.WeatherContract;
 import com.pixelimpressions.www.sunshine.data.WeatherContract.LocationEntry;
+import com.pixelimpressions.www.sunshine.data.WeatherContract.WeatherEntry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Vector;
 
 /**
  * Created by mikie on 1/6/15.
@@ -75,7 +78,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         } else if (!unitType.equals(mContext.getString(R.string.pref_temp_units_metric))) {
             Log.d(LOG_TAG, "unit type not found " + unitType);
         }
-
 
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
@@ -181,15 +183,27 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         Log.v(LOG_TAG, cityName + ", with coord: " + cityLatitude + " " + cityLongitude);
 
         //Insert the location into the database
-        //The function is commented out because it hasn't been implemented yet
         long locationID = addLocation(locationSetting, cityName, cityLatitude, cityLongitude);
 
         String[] resultStrs = new String[numDays];
+
+        //Get and insert the weather information into the database
+        Vector<ContentValues> cVVector = new Vector<ContentValues>(weatherArray.length());
+
         for (int i = 0; i < weatherArray.length(); i++) {
-            //for now, using the format "Day,description,hi/low"
-            String day;
+            //These are the values that will be collected
+
+            long dateTime;
+            double pressure;
+            int humidity;
+            double windSpeed;
+            double windDirection;
+
+            double high;
+            double low;
+
             String description;
-            String highAndLow;
+            int weatherId;
 
             //Get the JSON object representing the day
             JSONObject dayForecast = weatherArray.getJSONObject(i);
@@ -197,20 +211,41 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             //The date/time is returned as a long.We need to convert that
             //into something human readable,since most people won't read "1400356800"
             //as "this saturday"
-            long dateTime = dayForecast.getLong(OWM_DATETIME);
-            day = getReadableDateString(dateTime);
+            dateTime = dayForecast.getLong(OWM_DATETIME);
+
+            pressure = dayForecast.getDouble(OWM_PRESSURE);
+            humidity = dayForecast.getInt(OWM_HUMIDITY);
+            windSpeed = dayForecast.getDouble(OWM_WINDSPEED);
+            windDirection = dayForecast.getDouble(OWM_WIND_DIRECTION);
 
             //description is in a child array called "weather" that is one element long
             JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
             description = weatherObject.getString(OWM_DESCRIPTION);
+            weatherId = weatherObject.getInt(OWM_WEATHER_ID);
 
             //Temperatures are in a child object called "temp".Try not to name variables
             //temp when working with temperature.it confuses everybody
             JSONObject temperatureObject = dayForecast.getJSONObject(OWM_TEMPERATURE);
-            double high = temperatureObject.getDouble(OWM_MAX);
-            double low = temperatureObject.getDouble(OWM_MIN);
+            high = temperatureObject.getDouble(OWM_MAX);
+            low = temperatureObject.getDouble(OWM_MIN);
 
-            highAndLow = formatHighLows(high, low);
+            ContentValues weatherValues = new ContentValues();
+
+            weatherValues.put(WeatherEntry.COLUMN_LOC_KEY, locationID);
+            weatherValues.put(WeatherEntry.COLUMN_DATETEXT, WeatherContract.getDbDateString(new Date(dateTime * 1000L)));
+            weatherValues.put(WeatherEntry.COLUMN_HUMIDITY, humidity);
+            weatherValues.put(WeatherEntry.COLUMN_PRESSURE, pressure);
+            weatherValues.put(WeatherEntry.COLUMN_WIND_SPEED, windSpeed);
+            weatherValues.put(WeatherEntry.COLUMN_DEGREES, windDirection);
+            weatherValues.put(WeatherEntry.COLUMN_MAX_TEMP, high);
+            weatherValues.put(WeatherEntry.COLUMN_MIN_TEMP, low);
+            weatherValues.put(WeatherEntry.COLUMN_SHORT_DESC, description);
+            weatherValues.put(WeatherEntry.COLUMN_WEATHER_ID, weatherId);
+
+            cVVector.add(weatherValues);
+
+            String highAndLow = formatHighLows(high, low);
+            String day = getReadableDateString(dateTime);
             resultStrs[i] = day + " - " + description + " - " + highAndLow;
         }
         return resultStrs;

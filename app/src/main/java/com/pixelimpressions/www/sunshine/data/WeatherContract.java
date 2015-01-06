@@ -4,6 +4,9 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by mikie on 11/6/14.
  */
@@ -32,6 +35,23 @@ public class WeatherContract {
     public static final String PATH_WEATHER = "weather";
     public static final String PATH_LOCATION = "location";
 
+    //Format used for storing date in the databse.also used for converting those strings
+    //back into date objects for comparison/processing
+    public static final String DATE_FORMAT = "yyyyMMdd";
+
+    /**
+     * Converts Date class to a String representation,used for easy comparison and database lookup.
+     *
+     * @param date-The input date
+     * @return a DB-freindly representation of the date uing the format defined in DATE_FORMAT
+     */
+    public static String getDbDateString(Date date) {
+        // Because the API returns a unix timestamp (measured in seconds),
+        // it must be converted to milliseconds in order to be converted to valid date.
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+        return sdf.format(date);
+    }
+
 
     public static final class LocationEntry implements BaseColumns {
         /*inner class that defines the contents of the location table*/
@@ -42,18 +62,17 @@ public class WeatherContract {
         //database column names
         //table name
         public static final String TABLE_NAME = "location";        //special mime types that tell the content provide whether this
-        // is a list(dir) of items or an item
+        //the location setting string is what us sent to openweathermap as the location query
+        public static final String COLUMN_LOCATION_SETTING = "location_setting";        // is a list(dir) of items or an item
         public static final String CONTENT_TYPE =
                 "vnd.android.cursor.dir/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
-        //the location setting string is what us sent to openweathermap as the location query
-        public static final String COLUMN_LOCATION_SETTING = "location_setting";
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
         //name of the city stored as text human readable location string provided by the API
         public static final String COLUMN_CITY_NAME = "city_name";
         //longitude and latitude this is obtained after launching the mapintent
         // so we can store the latitude and longitude as returned by openweathermap
         public static final String COLUMN_COORD_LONGITUDE = "coord_long";
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
         public static final String COLUMN_COORD_LATITUDE = "coord_lat";
 
         //a uri call with only an id for querying a single location item
@@ -73,16 +92,16 @@ public class WeatherContract {
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_WEATHER).build();
         //Database values
         public static final String TABLE_NAME = "weather";
-        public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/" + CONTENT_AUTHORITY + "/" + PATH_WEATHER;
         //column with the foreign key into the location table
         public static final String COLUMN_LOC_KEY = "location_id";
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/" + CONTENT_AUTHORITY + "/" + PATH_WEATHER;
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/" + CONTENT_AUTHORITY + "/" + PATH_WEATHER;
         //DATE,stored as TEXT with format yyyy-mm-dd
         public static final String COLUMN_DATETEXT = "date";
         //weather id as returned buy the API,to identify the icon to be used
         public static final String COLUMN_WEATHER_ID = "weather_id";
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/" + CONTENT_AUTHORITY + "/" + PATH_WEATHER;
         //Short description and long description as returned by the weather api
         public static final String COLUMN_SHORT_DESC = "short_desc";
         //min and max temperatures for the day stored as floats
@@ -106,11 +125,6 @@ public class WeatherContract {
             return CONTENT_URI.buildUpon().appendPath(locationSetting).build();
         }
 
-
-        /*these are uri builder and decoder functions
-         *they reduce the places in code that have the actual uri
-         * */
-
         public static Uri buildWeatherLocationWithStartDate
                 (String locationSetting, String startDate) {
             return CONTENT_URI.buildUpon().appendPath(locationSetting)
@@ -120,6 +134,11 @@ public class WeatherContract {
         public static Uri buildWeatherLocationWithDate(String locationSetting, String date) {
             return CONTENT_URI.buildUpon().appendPath(locationSetting).appendPath(date).build();
         }
+
+
+        /*these are uri builder and decoder functions
+         *they reduce the places in code that have the actual uri
+         * */
 
         //decodes the uri structure
         public static String getLocationSettingFromUri(Uri uri) {
