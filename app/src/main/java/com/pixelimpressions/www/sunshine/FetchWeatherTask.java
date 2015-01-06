@@ -1,12 +1,17 @@
 package com.pixelimpressions.www.sunshine;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+
+import com.pixelimpressions.www.sunshine.data.WeatherContract.LocationEntry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -80,6 +85,54 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     }
 
     /**
+     * Helper method to handle insertion of a new location in the weather database.
+     *
+     * @param locationSetting The location string used to request updates from the server.
+     * @param cityName        A human-readable city name, e.g "Mountain View"
+     * @param lat             the latitude of the city
+     * @param lon             the longitude of the city
+     * @return the row ID of the added location.
+     */
+    private long addLocation(String locationSetting, String cityName, double lat, double lon) {
+        Log.v(LOG_TAG, "Inserting " + cityName + ", with coord: " + lat + " " + lon);
+
+
+        //query to see if its previously entered into db
+        Cursor cursor = mContext.getContentResolver().query(
+                LocationEntry.CONTENT_URI, //URI
+                new String[]{LocationEntry._ID},//projection
+                LocationEntry.COLUMN_LOCATION_SETTING + " = ?", //selection
+                new String[]{locationSetting}, //selectionArgs
+                null); //sortOrder
+
+        try {
+            if (cursor.moveToNext()) {
+                Log.v(LOG_TAG, "Found it in the database!");
+                int locationIndex = cursor.getColumnIndex(LocationEntry._ID);
+                return cursor.getLong(locationIndex);
+            } else {
+                Log.v(LOG_TAG, "Didn't find it in the database. inserting now!");
+
+                ContentValues locationValues = new ContentValues();
+                locationValues.put(LocationEntry.COLUMN_LOCATION_SETTING, locationSetting);
+                locationValues.put(LocationEntry.COLUMN_CITY_NAME, cityName);
+                locationValues.put(LocationEntry.COLUMN_COORD_LATITUDE, lat);
+                locationValues.put(LocationEntry.COLUMN_COORD_LONGITUDE, lon);
+
+                //perform the insert,returns a uri
+                Uri locationInsertUri = mContext.getContentResolver().insert(LocationEntry.CONTENT_URI, locationValues);
+                return ContentUris.parseId(locationInsertUri);
+            }
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Opps something went wrong! " + e.getMessage());
+            return 0;
+        } finally {
+            cursor.close();
+        }
+
+    }
+
+    /**
      * Take the String representing the complete forecast in JSON Format and
      * pull out the data we need to construct the Strings needed for the wireframes.
      * <p/>
@@ -128,8 +181,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         Log.v(LOG_TAG, cityName + ", with coord: " + cityLatitude + " " + cityLongitude);
 
         //Insert the location into the database
-        //The function is commented out becaiuse it hasn't been implemented yet
-        // long locationID=addLocation(locationSetting,cityName,cityLatitude,cityLongitude);
+        //The function is commented out because it hasn't been implemented yet
+        long locationID = addLocation(locationSetting, cityName, cityLatitude, cityLongitude);
 
         String[] resultStrs = new String[numDays];
         for (int i = 0; i < weatherArray.length(); i++) {
