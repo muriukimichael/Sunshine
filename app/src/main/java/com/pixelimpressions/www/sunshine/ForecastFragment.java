@@ -1,9 +1,7 @@
 package com.pixelimpressions.www.sunshine;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -98,8 +96,7 @@ public class ForecastFragment extends Fragment {
 
 
     private void updateWeather() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String location = sharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+        String location = Utility.getPreferredLocation(getActivity());
         FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity(), mForecastAdapter);
         weatherTask.execute(location);
     }
