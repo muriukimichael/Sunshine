@@ -86,43 +86,73 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
      * Fortunately parsing is easy:  constructor takes the JSON string and converts it
      * into an Object hierarchy for us.
      */
-    private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays)
+    private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays, String locationSetting)
             throws JSONException {
 
-        // These are the names of the JSON objects that need to be extracted.
+        //These are the names of the JSON objects that need to be extracted
+
+        //Location information
+        final String OWN_CITY = "city";
+        final String OWN_CITY_NAME = "name";
+        final String OWN_COORD = "coord";
+        final String OWM_COORD_LAT = "lat";
+        final String OWM_COORD_LONG = "long";
+
+        //weather information.Each days forecast info is an element of the "list" array
         final String OWM_LIST = "list";
-        final String OWM_WEATHER = "weather";
+
+        final String OWM_DATETIME = "dt";
+        final String OWM_PRESSURE = "pressure";
+        final String OWM_HUMIDITY = "humidity";
+        final String OWM_WINDSPEED = "speed";
+        final String OWM_WIND_DIRECTION = "deg";
+
+        //All temperatures are children of the temp object
         final String OWM_TEMPERATURE = "temp";
         final String OWM_MAX = "max";
         final String OWM_MIN = "min";
-        final String OWM_DATETIME = "dt";
-        final String OWM_DESCRIPTION = "main"; //main fits here
+
+        final String OWM_WEATHER = "weather";
+        final String OWM_DESCRIPTION = "main";
+        final String OWM_WEATHER_ID = "id";
 
         JSONObject forecastJson = new JSONObject(forecastJsonStr);
         JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
 
+        JSONObject cityJson = forecastJson.getJSONObject(OWN_CITY);
+        String cityName = cityJson.getString(OWN_CITY_NAME);
+        JSONObject coordJson = cityJson.getJSONObject(OWN_COORD);
+        double cityLatitude = coordJson.getDouble(OWM_COORD_LAT);
+        double cityLongitude = coordJson.getDouble(OWM_COORD_LONG);
+
+        Log.v(LOG_TAG, cityName + ", with coord: " + cityLatitude + " " + cityLongitude);
+
+        //Insert the location into the database
+        //The function is commented out becaiuse it hasn't been implemented yet
+        // long locationID=addLocation(locationSetting,cityName,cityLatitude,cityLongitude);
+
         String[] resultStrs = new String[numDays];
         for (int i = 0; i < weatherArray.length(); i++) {
-            // For now, using the format "Day, description, hi/low"
+            //for now, using the format "Day,description,hi/low"
             String day;
             String description;
             String highAndLow;
 
-            // Get the JSON object representing the day
+            //Get the JSON object representing the day
             JSONObject dayForecast = weatherArray.getJSONObject(i);
 
-            // The date/time is returned as a long.  We need to convert that
-            // into something human-readable, since most people won't read "1400356800" as
-            // "this saturday".
+            //The date/time is returned as a long.We need to convert that
+            //into something human readable,since most people won't read "1400356800"
+            //as "this saturday"
             long dateTime = dayForecast.getLong(OWM_DATETIME);
             day = getReadableDateString(dateTime);
 
-            // description is in a child array called "weather", which is 1 element long.
+            //description is in a child array called "weather" that is one element long
             JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
             description = weatherObject.getString(OWM_DESCRIPTION);
 
-            // Temperatures are in a child object called "temp".  Try not to name variables
-            // "temp" when working with temperature.  It confuses everybody.
+            //Temperatures are in a child object called "temp".Try not to name variables
+            //temp when working with temperature.it confuses everybody
             JSONObject temperatureObject = dayForecast.getJSONObject(OWM_TEMPERATURE);
             double high = temperatureObject.getDouble(OWM_MAX);
             double low = temperatureObject.getDouble(OWM_MIN);
@@ -130,14 +160,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             highAndLow = formatHighLows(high, low);
             resultStrs[i] = day + " - " + description + " - " + highAndLow;
         }
-
-        //logs the created array
-        for (String s : resultStrs) {
-            Log.v(LOG_TAG, "Forecast Entry " + s);
-        }
-
-
         return resultStrs;
+
     }
 
 
@@ -159,7 +183,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         //query arguments for the url
         String format = "json";
         String units = "metric";
-        int numDays = 7;
+        int numDays = 14;
+        String locationQuery = params[0];
 
         try {
             // Construct the URL for the OpenWeatherMap query
@@ -231,7 +256,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
         //get the parsed JSON from the array
         try {
-            return getWeatherDataFromJson(forecastJsonStr, numDays);
+            return getWeatherDataFromJson(forecastJsonStr, numDays, locationQuery);
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
