@@ -89,7 +89,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
     /**
      * Take the String representing the complete forecast in JSON Format and
      * pull out the data we need to construct the Strings needed for the wireframes.
-     *
+     * <p/>
      * Fortunately parsing is easy:  constructor takes the JSON string and converts it
      * into an Object hierarchy for us.
      */
@@ -184,7 +184,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
             ContentValues weatherValues = new ContentValues();
 
             weatherValues.put(WeatherEntry.COLUMN_LOC_KEY, locationID);
-            weatherValues.put(WeatherEntry.COLUMN_DATETEXT, WeatherContract.getDbDateString(new Date(dateTime * 1000L)));
+            weatherValues.put(WeatherEntry.COLUMN_DATETEXT,
+                    WeatherContract.getDbDateString(new Date(dateTime * 1000L)));
             weatherValues.put(WeatherEntry.COLUMN_HUMIDITY, humidity);
             weatherValues.put(WeatherEntry.COLUMN_PRESSURE, pressure);
             weatherValues.put(WeatherEntry.COLUMN_WIND_SPEED, windSpeed);
