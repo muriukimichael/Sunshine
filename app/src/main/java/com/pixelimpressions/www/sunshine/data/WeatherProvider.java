@@ -165,7 +165,7 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        /*This is thh first method to be implemented for the provider
+        /*This is the first method to be implemented for the provider
         * it returns the MIME type corresponding the content URI.Mime type format
         * describes the type of data returned in the URI argument*/
         final int match = sUriMatcher.match(uri);
@@ -226,24 +226,20 @@ public class WeatherProvider extends ContentProvider {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         int rowsDeleted;
-
         switch (match) {
-
             case WEATHER:
-                rowsDeleted = db.delete(WeatherContract.WeatherEntry.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = db.delete(
+                        WeatherContract.WeatherEntry.TABLE_NAME, selection, selectionArgs);
                 break;
-
             case LOCATION:
-                rowsDeleted = db.delete(WeatherContract.LocationEntry.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = db.delete(
+                        WeatherContract.LocationEntry.TABLE_NAME, selection, selectionArgs);
                 break;
-
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-
-        //because a null deletes all rows
+        // Because a null deletes all rows
         if (selection == null || rowsDeleted != 0) {
-            //notify of data change
             getContext().getContentResolver().notifyChange(uri, null);
         }
         return rowsDeleted;
@@ -290,10 +286,11 @@ public class WeatherProvider extends ContentProvider {
                             returnCount++;
                         }
                     }
-                    db.setTransactionSuccessful(); //ensure the comit
+                    db.setTransactionSuccessful(); //ensure you commit
                 } finally {
                     db.endTransaction();
                 }
+                //as always notify of change
                 getContext().getContentResolver().notifyChange(uri, null);
                 return returnCount;
             default:
