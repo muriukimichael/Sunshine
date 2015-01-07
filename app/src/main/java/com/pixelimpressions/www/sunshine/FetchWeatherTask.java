@@ -147,11 +147,11 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         //These are the names of the JSON objects that need to be extracted
 
         //Location information
-        final String OWN_CITY = "city";
-        final String OWN_CITY_NAME = "name";
-        final String OWN_COORD = "coord";
+        final String OWM_CITY = "city";
+        final String OWM_CITY_NAME = "name";
+        final String OWM_COORD = "coord";
         final String OWM_COORD_LAT = "lat";
-        final String OWM_COORD_LONG = "long";
+        final String OWM_COORD_LONG = "lon";
 
         //weather information.Each days forecast info is an element of the "list" array
         final String OWM_LIST = "list";
@@ -174,11 +174,13 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         JSONObject forecastJson = new JSONObject(forecastJsonStr);
         JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
 
-        JSONObject cityJson = forecastJson.getJSONObject(OWN_CITY);
-        String cityName = cityJson.getString(OWN_CITY_NAME);
-        JSONObject coordJson = cityJson.getJSONObject(OWN_COORD);
-        double cityLatitude = coordJson.getDouble(OWM_COORD_LAT);
-        double cityLongitude = coordJson.getDouble(OWM_COORD_LONG);
+
+        JSONObject cityJson = forecastJson.getJSONObject(OWM_CITY);
+        String cityName = cityJson.getString(OWM_CITY_NAME);
+        JSONObject coordJSON = cityJson.getJSONObject(OWM_COORD);
+        double cityLatitude = coordJSON.getDouble(OWM_COORD_LAT);
+        double cityLongitude = coordJSON.getDouble(OWM_COORD_LONG);
+
 
         Log.v(LOG_TAG, cityName + ", with coord: " + cityLatitude + " " + cityLongitude);
 
