@@ -1,11 +1,9 @@
 package com.pixelimpressions.www.sunshine.test;
 
-import android.annotation.TargetApi;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
@@ -252,9 +250,6 @@ public class TestProvider extends AndroidTestCase {
         deleteAllRecords();
     }
 
-    // The target api annotation is needed for the call to keySet -- we wouldn't want
-    // to use this in our app, but in a test it's fine to assume a higher target.
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     void addAllContentValues(ContentValues destination, ContentValues source) {
         for (String key : source.keySet()) {
             destination.put(key, source.getAsString(key));
