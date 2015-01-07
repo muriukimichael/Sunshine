@@ -88,7 +88,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         //initialize the SimpleCursorAdapter for handling the data and ListView
         mForecastAdapter = new SimpleCursorAdapter(getActivity(), //context
                 R.layout.list_item_forecast,//list item layout
-                null,
+                null, //the database cursor,null as the cursor is not available yet
                 // the columns to use to fill the TextViews
                 new String[]{WeatherEntry.COLUMN_DATETEXT,
                         WeatherEntry.COLUMN_SHORT_DESC,
@@ -101,7 +101,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                         R.id.list_item_high_textview,
                         R.id.list_item_low_textview
                 },
-                0 //flags
+                0 //prevents the adapter from registering a ContentObserver
+                // instead the cursorLoader does this
         );
 
         //format date before displaying
@@ -134,9 +135,26 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         fListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(Intent.EXTRA_TEXT, "PlaceHolder");
-                startActivity(intent);
+                //get date from cursor,format it and bundle up as we start the DetailsActivity
+                Cursor cursor = mForecastAdapter.getCursor();
+                if (cursor != null && cursor.moveToPosition(position)) {
+                    String dateString = Utility.formatDate(cursor.getString(COL_WEATHER_DATE));
+                    String weatherDescription = cursor.getString(COL_WEATHER_DESC);
+
+                    boolean isMetric = Utility.isMetric(getActivity());
+
+                    String high = Utility.formatTemperature(
+                            cursor.getDouble(COL_WEATHER_MAX_TEMP), isMetric);
+                    String low = Utility.formatTemperature(
+                            cursor.getDouble(COL_WEATHER_MIN_TEMP), isMetric);
+
+                    String detailString = String.format("%s - %s - %s/%s",
+                            dateString, weatherDescription, high, low);
+
+                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
+                    intent.putExtra(Intent.EXTRA_TEXT, detailString);
+                    startActivity(intent);
+                }
             }
         });
         return rootView;
@@ -206,12 +224,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     //use the data from the loader
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        //update the UI.called automatically when a Loader has finished its load
         mForecastAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         //if the loader is reset,we don't have any data so we just pull the cursor to null
+        // this removes any reference to data previously held
         mForecastAdapter.swapCursor(null);
     }
 }

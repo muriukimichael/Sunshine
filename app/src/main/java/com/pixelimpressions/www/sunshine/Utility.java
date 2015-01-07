@@ -20,13 +20,16 @@ public class Utility {
     }
 
     public static boolean isMetric(Context context) {
+        //get the current setting for metrics from shared preferences
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(context.getString(R.string.pref_tempunits_key),
                 context.getString(R.string.pref_temp_units_metric))
                 .equals(context.getString(R.string.pref_temp_units_metric));
     }
 
+    //Converts temperature to imperial or metric format
     static String formatTemperature(double temperature, boolean isMetric) {
+
         double temp;
         if (!isMetric) {
             temp = 9 * temperature / 5 + 32;
