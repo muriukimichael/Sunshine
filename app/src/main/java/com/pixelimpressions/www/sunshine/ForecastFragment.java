@@ -147,10 +147,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 //get date from cursor,format it and bundle up as we start the DetailsActivity
                 Cursor cursor = mForecastAdapter.getCursor();
                 if (cursor != null && cursor.moveToPosition(position)) {
-                    String dateString = cursor.getString(COL_WEATHER_DATE);
-
                     Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                    intent.putExtra(Intent.EXTRA_TEXT, dateString);
+                    intent.putExtra(DetailsActivity.DATE_KEY, cursor.getString(COL_WEATHER_DATE));
                     startActivity(intent);
                 }
             }

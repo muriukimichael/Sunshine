@@ -26,6 +26,7 @@ import com.pixelimpressions.www.sunshine.data.WeatherContract.WeatherEntry;
 
 public class DetailsActivity extends ActionBarActivity {
 
+    public static final String DATE_KEY = "forecast_date";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
