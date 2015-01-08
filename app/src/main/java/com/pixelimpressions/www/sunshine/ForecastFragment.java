@@ -31,6 +31,7 @@ import java.util.List;
  * Weather Fragment
  */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+
     //The indices are tied to FORECAST_COLUMNS.IF FORECAST_COLUMNS changes,these
     //must change
     public static final int COL_WEATHER_ID = 0;
@@ -146,21 +147,10 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 //get date from cursor,format it and bundle up as we start the DetailsActivity
                 Cursor cursor = mForecastAdapter.getCursor();
                 if (cursor != null && cursor.moveToPosition(position)) {
-                    String dateString = Utility.formatDate(cursor.getString(COL_WEATHER_DATE));
-                    String weatherDescription = cursor.getString(COL_WEATHER_DESC);
-
-                    boolean isMetric = Utility.isMetric(getActivity());
-
-                    String high = Utility.formatTemperature(
-                            cursor.getDouble(COL_WEATHER_MAX_TEMP), isMetric);
-                    String low = Utility.formatTemperature(
-                            cursor.getDouble(COL_WEATHER_MIN_TEMP), isMetric);
-
-                    String detailString = String.format("%s - %s - %s/%s",
-                            dateString, weatherDescription, high, low);
+                    String dateString = cursor.getString(COL_WEATHER_DATE);
 
                     Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                    intent.putExtra(Intent.EXTRA_TEXT, detailString);
+                    intent.putExtra(Intent.EXTRA_TEXT, dateString);
                     startActivity(intent);
                 }
             }
