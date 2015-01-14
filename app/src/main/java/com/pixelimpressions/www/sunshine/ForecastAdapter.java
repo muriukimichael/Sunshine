@@ -16,14 +16,44 @@ import android.widget.TextView;
 
 public class ForecastAdapter extends CursorAdapter {
 
+    //string representations of the view to return
+    private static final int VIEW_TYPE_TODAY = 0;
+    private static final int VIEW_TYPE_FUTURE_DAY = 1;
+
     public ForecastAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
     @Override
+    public int getItemViewType(int position) {
+        if (position == 0) {
+            //this is for today
+            return VIEW_TYPE_TODAY;
+        } else {
+            //every other layout
+            return VIEW_TYPE_FUTURE_DAY;
+        }
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        //we have two different layouts to populate the list with
+        return 2;
+    }
+
+    @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         //creates a new view for displaying data from a cursor
-        return LayoutInflater.from(context).inflate(R.layout.list_item_forecast, parent, false);
+        int viewType = getItemViewType(cursor.getPosition());
+        int layoutId = -1;
+
+        //inflate the multiple views for today and the rest of the days
+        if (viewType == VIEW_TYPE_TODAY) {
+            layoutId = R.layout.list_item_forecast_today;
+        } else {
+            layoutId = R.layout.list_item_forecast;
+        }
+        return LayoutInflater.from(context).inflate(layoutId, parent, false);
     }
 
     @Override
