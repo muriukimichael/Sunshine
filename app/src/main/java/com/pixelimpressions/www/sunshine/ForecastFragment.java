@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,15 +16,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.pixelimpressions.www.sunshine.data.WeatherContract;
 import com.pixelimpressions.www.sunshine.data.WeatherContract.LocationEntry;
 import com.pixelimpressions.www.sunshine.data.WeatherContract.WeatherEntry;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Weather Fragment
@@ -40,7 +36,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public static final int COL_WEATHER_MAX_TEMP = 3;
     public static final int COL_WEATHER_MIN_TEMP = 4;
     public static final int COL_LOCATION_SETTING = 5;
+
     private static final String DEBUG_TAG = "ForecastFragment";
+
     //for the forecast view we are showing only a small subset of the stored data.
     //Specify the columns we need
     private static final String[] FORECAST_COLUMNS = {
@@ -57,8 +55,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             WeatherEntry.COLUMN_MIN_TEMP,
             LocationEntry.COLUMN_LOCATION_SETTING
     };
+
     private static final int FORECAST_LOADER = 0;
-    private SimpleCursorAdapter mForecastAdapter;
+    private ForecastAdapter mForecastAdapter;
     private String mLocation;
 
 
@@ -69,6 +68,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //add this line in order for the fragment to handle menu events
         setHasOptionsMenu(true);
     }
 
@@ -92,56 +92,13 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        List<String> weekForecast = new ArrayList<String>();
-
-        //initialize the SimpleCursorAdapter for handling the data and ListView
-        mForecastAdapter = new SimpleCursorAdapter(getActivity(), //context
-                R.layout.list_item_forecast,//list item layout
-                null, //the database cursor,null as the cursor is not available yet
-                // the columns to use to fill the TextViews
-                new String[]{WeatherEntry.COLUMN_DATETEXT,
-                        WeatherEntry.COLUMN_SHORT_DESC,
-                        WeatherEntry.COLUMN_MAX_TEMP,
-                        WeatherEntry.COLUMN_MIN_TEMP},
-
-                //the TextViews to fill with the data pulled from the columns
-                new int[]{R.id.list_item_date_textview,
-                        R.id.list_item_forecast_textview,
-                        R.id.list_item_high_textview,
-                        R.id.list_item_low_textview
-                },
-                0 //prevents the adapter from registering a ContentObserver
-                // instead the cursorLoader does this
-        );
-
-        //format date before displaying
-        mForecastAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                boolean isMetric = Utility.isMetric(getActivity());
-                switch (columnIndex) {
-                    case COL_WEATHER_MAX_TEMP:
-                    case COL_WEATHER_MIN_TEMP: {
-                        // we have to do some formatting and possibly a conversion
-                        ((TextView) view).setText(Utility.formatTemperature(
-                                cursor.getDouble(columnIndex), isMetric));
-                        return true;
-                    }
-                    case COL_WEATHER_DATE: {
-                        String dateString = cursor.getString(columnIndex);
-                        TextView dateView = (TextView) view;
-                        dateView.setText(Utility.formatDate(dateString));
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
+        mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
 
         //get a reference to the listview,and attach this adapter to it.
         ListView fListView = (ListView) rootView.findViewById(R.id.listview_forecast);
         fListView.setAdapter(mForecastAdapter);
         fListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 //get date from cursor,format it and bundle up as we start the DetailsActivity
@@ -153,6 +110,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 }
             }
         });
+
         return rootView;
     }
 
