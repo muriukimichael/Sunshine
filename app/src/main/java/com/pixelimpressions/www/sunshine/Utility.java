@@ -36,7 +36,7 @@ public class Utility {
     }
 
     //Converts temperature to imperial or metric format
-    static String formatTemperature(double temperature, boolean isMetric) {
+    static String formatTemperature(Context context, double temperature, boolean isMetric) {
 
         double temp;
         if (!isMetric) {
@@ -44,7 +44,8 @@ public class Utility {
         } else {
             temp = temperature;
         }
-        return String.format("%.0f", temp);
+        //get the formatted string from xml and pass in the parameters to fill
+        return context.getString(R.string.format_temperature, temp);
     }
 
     static String formatDate(String dateString) {
