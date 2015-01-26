@@ -10,8 +10,7 @@
     <ImageView
         android:id="@+id/list_item_icon"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_launcher" />
+        android:layout_height="wrap_content" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -20,18 +19,15 @@
         android:orientation="vertical"
         android:paddingLeft="16dp">
 
-    <TextView
+        <TextView
             android:id="@+id/list_item_date_textview"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Tomorrow" />
-
+            android:layout_height="match_parent" />
 
         <TextView
             android:id="@+id/list_item_forecast_textview"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Clear" />
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 
@@ -44,15 +40,13 @@
         <TextView
             android:id="@+id/list_item_high_textview"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="21" />
+            android:layout_height="match_parent" />
 
 
         <TextView
             android:id="@+id/list_item_low_textview"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="8" />
+            android:layout_height="match_parent" />
     </LinearLayout>
 
 </LinearLayout>

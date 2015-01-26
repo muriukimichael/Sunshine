@@ -9,6 +9,8 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.pixelimpressions.www.sunshine.data.WeatherContract;
+
 /**
  * {@link ForecastAdapter} exposes a list of weather forecasts
  * from a {@link Cursor} to a {@link android.widget.ListView}.
@@ -70,11 +72,27 @@ public class ForecastAdapter extends CursorAdapter {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         //read weather ID from the cursor
-        int weatherId = cursor.getInt(ForecastFragment.COL_WEATHER_ID);
+        int weatherId = cursor.getInt(
+                cursor.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID));
         //use placeholder for now
-        //ImageView iconView = (ImageView) view.findViewById(R.id.list_item_icon);  replaced by
-        // viewholder reference
-        viewHolder.iconView.setImageResource(R.drawable.ic_launcher);
+
+        int viewType = getItemViewType(cursor.getPosition());
+
+        switch (viewType) {
+
+            case VIEW_TYPE_TODAY:
+                //get weather icon
+                viewHolder.iconView.setImageResource(
+                        Utility.getArtResourceForWeatherCondition(weatherId));
+                break;
+
+            case VIEW_TYPE_FUTURE_DAY:
+                //get weather icon
+                viewHolder.iconView.setImageResource(
+                        Utility.getIconResourceForWeatherCondition(weatherId));
+                break;
+        }
+
 
         //Read date from the cursor
         String dateString = cursor.getString(ForecastFragment.COL_WEATHER_DATE);

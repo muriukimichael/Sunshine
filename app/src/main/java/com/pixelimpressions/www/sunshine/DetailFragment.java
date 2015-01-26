@@ -26,6 +26,8 @@ import android.widget.TextView;
 
 import com.pixelimpressions.www.sunshine.data.WeatherContract;
 
+import java.util.Date;
+
 /**
  * A placeholder fragment containing a simple view
  */
@@ -132,7 +134,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     /**
-     * we intialize the loader here as it is bound to the
+     * we initialize the loader here as it is bound to the
      * activity lifecycle.we then update mLocation if
      * one had been saved
      *
@@ -211,7 +213,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 data.getString(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT)));
         mDateView.setText(monthDayString);
 
-        mIconView.setImageResource(R.drawable.ic_launcher);
+        //Check which resource to load based on the date
+        Date today = new Date();
+        if (data.getString(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT))
+                .equals(WeatherContract.getDbDateString(today))) {
+            mIconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherId));
+        } else {
+            mIconView.setImageResource(Utility.getIconResourceForWeatherCondition(weatherId));
+        }
 
         String weatherDescription = data.getString(
                 data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC));

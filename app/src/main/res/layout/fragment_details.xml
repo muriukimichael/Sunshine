@@ -62,8 +62,7 @@
                     android:id="@+id/details_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:scaleType="center"
-                    android:src="@drawable/ic_launcher" />
+                    android:scaleType="center" />
 
                 <TextView
                     android:id="@+id/details_tv_description"
