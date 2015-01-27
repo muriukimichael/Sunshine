@@ -63,6 +63,29 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         setHasOptionsMenu(true);
     }
 
+
+    /**
+     * we initialize the loader here as it is bound to the
+     * activity lifecycle.we then update mLocation if
+     * one had been saved
+     *
+     * @param savedInstanceState -bundle containing the saved states
+     */
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        if (savedInstanceState != null) {
+            mLocation = savedInstanceState.getString(LOCATION_KEY);
+        }
+        //if we have the date key lets restart the loader else fallback to placeholder data
+        Intent intent = getActivity().getIntent();
+        if (intent != null && intent.hasExtra(DetailsActivity.DATE_KEY)) {
+            getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        }
+    }
+
+
     /**
      * Saves the location
      * Called to ask the fragment to save its current dynamic state, so it can later be
@@ -120,7 +143,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         return rootView;
     }
 
-        /*
+    @Override
+    public void onResume() {
+        super.onResume();
+        Intent intent = getActivity().getIntent();
+        if (intent != null && intent.hasExtra(DetailsActivity.DATE_KEY)
+                && mLocation != null &&
+                !mLocation.equals(Utility.getPreferredLocation(getActivity()))) {
+            getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+        }
+    }
+
+
+    /*
         * create the intent for use with the share action provider
         * */
 
@@ -131,22 +166,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         //ensures that back navigation does not leave app by clearing this task
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         return shareIntent;
-    }
-
-    /**
-     * we initialize the loader here as it is bound to the
-     * activity lifecycle.we then update mLocation if
-     * one had been saved
-     *
-     * @param savedInstanceState -bundle containing the saved states
-     */
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
-        if (savedInstanceState != null) {
-            mLocation = savedInstanceState.getString(LOCATION_KEY);
-        }
     }
 
 
