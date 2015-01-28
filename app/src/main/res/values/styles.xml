@@ -5,4 +5,9 @@
         <!-- Customize your theme here. -->
     </style>
 
+
+    <!--We don't need a choiceMode in single pane Mode-->
+    <style name="ForecastListStyle">
+
+    </style>
 </resources>
