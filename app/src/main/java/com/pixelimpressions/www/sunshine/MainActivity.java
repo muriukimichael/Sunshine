@@ -11,7 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements ForecastFragment.CallBack {
 
     private final String LOG_TAG = "MainActivity";
     private boolean mTwoPane;
@@ -78,6 +78,38 @@ public class MainActivity extends ActionBarActivity {
             startActivity(mapIntent);
         } else {
             Log.d(LOG_TAG, "Could not call " + location + " , no intent resolver present");
+        }
+
+    }
+
+    /**
+     * Implementing this method allows the ForecastFragment to notify the DetailActivity
+     * that the position selected on the list has changed.This is an implementation of
+     * Interfragment communication
+     *
+     * @param date
+     */
+    @Override
+    public void onItemSelected(String date) {
+        Log.v("Date in MainActivity: ", date);
+        if (mTwoPane) {
+            //in two-pane mode,show the detail view in this activity
+            //by adding or replacing the detail fragment using a
+            //fragment transaction.
+            Bundle args = new Bundle();
+            args.putString(DetailsActivity.DATE_KEY, date);
+
+            DetailFragment detailFragment = new DetailFragment();
+            detailFragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, detailFragment)
+                    .commit();
+        } else {
+            //start a new activty if in single pane mode
+            Intent intent = new Intent(this, DetailsActivity.class);
+            intent.putExtra(DetailsActivity.DATE_KEY, date);
+            startActivity(intent);
         }
 
     }

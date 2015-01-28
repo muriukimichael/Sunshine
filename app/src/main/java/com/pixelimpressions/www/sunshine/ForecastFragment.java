@@ -1,6 +1,5 @@
 package com.pixelimpressions.www.sunshine;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -105,9 +105,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 //get date from cursor,format it and bundle up as we start the DetailsActivity
                 Cursor cursor = mForecastAdapter.getCursor();
                 if (cursor != null && cursor.moveToPosition(position)) {
-                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                    intent.putExtra(DetailsActivity.DATE_KEY, cursor.getString(COL_WEATHER_DATE));
-                    startActivity(intent);
+                    //notify the activity the position clicked has changed using the callback interface
+                    Log.v("Sent date", cursor.getString(COL_WEATHER_DATE));
+                    ((CallBack) getActivity()).onItemSelected(cursor.getString(COL_WEATHER_DATE));
                 }
             }
         });
@@ -189,4 +189,21 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // this removes any reference to data previously held
         mForecastAdapter.swapCursor(null);
     }
+
+
+    /**
+     * Created by mikie on 1/27/15.
+     * A callback interface that all activities containing this
+     * fragment must implement.This mechanism allows activities to be
+     * notified of item selections in order to handle the change
+     */
+    public interface CallBack {
+
+        /**
+         * Callback for when an item has been selected
+         */
+        public void onItemSelected(String date);
+
+    }
+
 }

@@ -16,9 +16,25 @@ public class DetailsActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+        //the detail fragment expects a bundle containing a key date.
+        //as we replace it we must therefore ensure that the date String is sent
+        //inside a bundle
         if (savedInstanceState == null) {
+
+            //get date from intent
+            String date = getIntent().getStringExtra(DATE_KEY);
+
+            //save it into bundle for transport
+            Bundle arguments = new Bundle();
+            arguments.putString(DATE_KEY, date);
+
+            //send it to the detailfragment
+            DetailFragment detailFragment = new DetailFragment();
+            detailFragment.setArguments(arguments);
+
+            //replace the fragment
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.weather_detail_container, new DetailFragment())
+                    .add(R.id.weather_detail_container, detailFragment)
                     .commit();
         }
     }
