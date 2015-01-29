@@ -25,6 +25,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pixelimpressions.www.sunshine.data.WeatherContract;
+import com.pixelimpressions.www.sunshine.data.WeatherContract.WeatherEntry;
+
 
 /**
  * A placeholder fragment containing a simple view
@@ -64,28 +66,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
 
     /**
-     * we initialize the loader here as it is bound to the
-     * activity lifecycle.we then update mLocation if
-     * one had been saved
-     *
-     * @param savedInstanceState -bundle containing the saved states
-     */
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
-        if (savedInstanceState != null) {
-            mLocation = savedInstanceState.getString(LOCATION_KEY);
-        }
-        //if we have the date key lets restart the loader else fallback to placeholder data
-        Bundle arguments = getArguments();
-        if (arguments != null && arguments.containsKey(DetailsActivity.DATE_KEY)) {
-            getLoaderManager().initLoader(DETAIL_LOADER, null, this);
-        }
-    }
-
-
-    /**
      * Saves the location
      * Called to ask the fragment to save its current dynamic state, so it can later be
      * reconstructed in a new instance of its process is restarted. If a new instance of the
@@ -107,23 +87,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         outState.putString(LOCATION_KEY, mLocation);
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        //inflate menu to make it visible to the user
-        inflater.inflate(R.menu.detailfragment, menu);
-        // Retrieve the share menu item
-        MenuItem menuItem = menu.findItem(R.id.action_share);
-
-        // Get the provider and hold onto it to set/change the share intent.
-        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
-
-        // Attach an intent to this ShareActionProvider.  You can update this at any time,
-        // like when the user selects a new piece of data they might like to share.
-        if (mForecastStr != null) {
-            mShareActionProvider.setShareIntent(createShareForecastIntent());
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -131,13 +94,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         Bundle arguments = getArguments();
         if (arguments != null) {
             mDateStr = arguments.getString(DetailsActivity.DATE_KEY);
-            Log.v("Date received", mDateStr);
         }
 
         if (savedInstanceState != null) {
             mLocation = savedInstanceState.getString(LOCATION_KEY);
         }
-
 
         View rootView = inflater.inflate(R.layout.fragment_details, container, false);
         mFriendlyDateView = (TextView) rootView.findViewById(R.id.details_tv_date);
@@ -153,6 +114,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         return rootView;
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
@@ -164,18 +126,54 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        //inflate menu to make it visible to the user
+        inflater.inflate(R.menu.detailfragment, menu);
 
-    /*
-        * create the intent for use with the share action provider
-        * */
+        // Retrieve the share menu item
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+
+        // Get the provider and hold onto it to set/change the share intent.
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+        //if onLoadFinished happens before this,we can go ahead and set the share intent now.
+        if (mForecastStr != null) {
+            mShareActionProvider.setShareIntent(createShareForecastIntent());
+        }
+    }
+
 
     private Intent createShareForecastIntent() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, mForecastStr + FORECAST_SHARE_HASHTAG);
         //ensures that back navigation does not leave app by clearing this task
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, mForecastStr + FORECAST_SHARE_HASHTAG);
         return shareIntent;
+    }
+
+
+    /**
+     * we initialize the loader here as it is bound to the
+     * activity lifecycle.we then update mLocation if
+     * one had been saved
+     *
+     * @param savedInstanceState -bundle containing the saved states
+     */
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mLocation = savedInstanceState.getString(LOCATION_KEY);
+        }
+        //if we have the date key lets restart the loader else fallback to placeholder data
+        Bundle arguments = getArguments();
+        if (arguments != null && arguments.containsKey(DetailsActivity.DATE_KEY)) {
+            getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        }
     }
 
 
@@ -196,16 +194,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         //the columns we need
         String[] FORECAST_COLUMNS = {
-                WeatherContract.WeatherEntry.TABLE_NAME + "." + WeatherContract.WeatherEntry._ID,
-                WeatherContract.WeatherEntry.COLUMN_DATETEXT,
-                WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
-                WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
-                WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
-                WeatherContract.WeatherEntry.COLUMN_HUMIDITY,
-                WeatherContract.WeatherEntry.COLUMN_DEGREES,
-                WeatherContract.WeatherEntry.COLUMN_WIND_SPEED,
-                WeatherContract.WeatherEntry.COLUMN_PRESSURE,
-                WeatherContract.WeatherEntry.COLUMN_WEATHER_ID
+                WeatherEntry.TABLE_NAME + "." + WeatherEntry._ID,
+                WeatherEntry.COLUMN_DATETEXT,
+                WeatherEntry.COLUMN_SHORT_DESC,
+                WeatherEntry.COLUMN_MAX_TEMP,
+                WeatherEntry.COLUMN_MIN_TEMP,
+                WeatherEntry.COLUMN_HUMIDITY,
+                WeatherEntry.COLUMN_DEGREES,
+                WeatherEntry.COLUMN_WIND_SPEED,
+                WeatherEntry.COLUMN_PRESSURE,
+                WeatherEntry.COLUMN_WEATHER_ID
         };
 
         //Now create and return a CursorLoader that will take care
@@ -225,46 +223,47 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         if (data != null && data.moveToFirst()) {
             //get weather icon and set it
-            int weatherId = data.getInt(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID));
+            int weatherId = data.getInt(data.getColumnIndex(WeatherEntry.COLUMN_WEATHER_ID));
+            //use weather art image
             mIconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherId));
 
             //format the dates and present them
             String dayString = Utility.getDayName(getActivity(),
-                    data.getString(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT)));
+                    data.getString(data.getColumnIndex(WeatherEntry.COLUMN_DATETEXT)));
             mFriendlyDateView.setText(dayString);
 
             String monthDayString = Utility.getFormattedMonthDay(getActivity(),
-                    data.getString(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT)));
+                    data.getString(data.getColumnIndex(WeatherEntry.COLUMN_DATETEXT)));
             mDateView.setText(monthDayString);
 
 
             //the weather description
             String weatherDescription = data.getString(
-                    data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC));
+                    data.getColumnIndex(WeatherEntry.COLUMN_SHORT_DESC));
             mWeatherDesc.setText(weatherDescription);
 
             //format temperature values and display
             boolean isMetric = Utility.isMetric(getActivity());
 
             String high = Utility.formatTemperature(getActivity(),
-                    data.getDouble(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP)), isMetric);
+                    data.getDouble(data.getColumnIndex(WeatherEntry.COLUMN_MAX_TEMP)), isMetric);
             mHighTempView.setText(high);
 
             String low = Utility.formatTemperature(getActivity(),
-                    data.getDouble(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP)), isMetric);
+                    data.getDouble(data.getColumnIndex(WeatherEntry.COLUMN_MIN_TEMP)), isMetric);
             mLowTempView.setText(low);
 
             //humidity values
-            float humidity = data.getFloat(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_HUMIDITY));
+            float humidity = data.getFloat(data.getColumnIndex(WeatherEntry.COLUMN_HUMIDITY));
             mHumidity.setText(String.format(getActivity().getString(R.string.format_humidity), humidity));
 
             //wind
-            float degrees = data.getFloat(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DEGREES));
-            float windSpeed = data.getFloat(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WIND_SPEED));
+            float degrees = data.getFloat(data.getColumnIndex(WeatherEntry.COLUMN_DEGREES));
+            float windSpeed = data.getFloat(data.getColumnIndex(WeatherEntry.COLUMN_WIND_SPEED));
             mWindSpeed.setText(Utility.getFormattedWind(getActivity(), windSpeed, degrees));
 
             //pressure
-            float pressure = data.getFloat(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_PRESSURE));
+            float pressure = data.getFloat(data.getColumnIndex(WeatherEntry.COLUMN_PRESSURE));
             mPressure.setText(String.format(getActivity().getString(R.string.format_pressure), pressure));
 
             //we need this for the shareIntent

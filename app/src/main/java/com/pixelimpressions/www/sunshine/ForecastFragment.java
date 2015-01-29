@@ -24,9 +24,10 @@ import com.pixelimpressions.www.sunshine.data.WeatherContract.WeatherEntry;
 import java.util.Date;
 
 /**
- * Weather Fragment
+ * Encapsulates fetching the forecast and displaying it as a{@link android.widget.ListView} layout.
  */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+
 
     //The indices are tied to FORECAST_COLUMNS.IF FORECAST_COLUMNS changes,these
     //must change
@@ -36,9 +37,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public static final int COL_WEATHER_MAX_TEMP = 3;
     public static final int COL_WEATHER_MIN_TEMP = 4;
     public static final int COL_LOCATION_SETTING = 5;
-
     private static final String DEBUG_TAG = "ForecastFragment";
-
     //for the forecast view we are showing only a small subset of the stored data.
     //Specify the columns we need
     private static final String[] FORECAST_COLUMNS = {
@@ -56,10 +55,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             LocationEntry.COLUMN_LOCATION_SETTING,
             WeatherContract.WeatherEntry.COLUMN_WEATHER_ID
     };
-
     private static final int FORECAST_LOADER = 0;
+    private static final String SELECTED_KEY = "selected_position";
     private ForecastAdapter mForecastAdapter;
     private String mLocation;
+    private int mPosition = ListView.INVALID_POSITION;
+    private ListView mListView;
 
 
     public ForecastFragment() {
@@ -79,53 +80,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        //update the loader when the activity resumes
-        if (mLocation != null && !mLocation.equals(Utility.getPreferredLocation(getActivity()))) {
-            getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
-        mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
-
-        //get a reference to the listview,and attach this adapter to it.
-        ListView fListView = (ListView) rootView.findViewById(R.id.listview_forecast);
-        fListView.setAdapter(mForecastAdapter);
-        fListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                //get date from cursor,format it and bundle up as we start the DetailsActivity
-                Cursor cursor = mForecastAdapter.getCursor();
-                if (cursor != null && cursor.moveToPosition(position)) {
-                    //notify the activity the position clicked has changed using the callback interface
-                    Log.v("Sent date", cursor.getString(COL_WEATHER_DATE));
-                    ((CallBack) getActivity()).onItemSelected(cursor.getString(COL_WEATHER_DATE));
-                }
-            }
-        });
-
-        return rootView;
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.forecastfragment, menu);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        //initialize the loader as its lifecycle is bound to the activity not the fragment
-        getLoaderManager().initLoader(FORECAST_LOADER, null, this);
-        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -142,13 +99,86 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         }
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
 
-    private void updateWeather() {
-        String location = Utility.getPreferredLocation(getActivity());
-        FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity());
-        weatherTask.execute(location);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+        // The ArrayAdapter will take data from a source and
+        // use it to populate the ListView it's attached to.
+        mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
+
+        //get a reference to the listview,and attach this adapter to it.
+        mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
+        mListView.setAdapter(mForecastAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                //get date from cursor,format it and bundle up as we start the DetailsActivity
+                Cursor cursor = mForecastAdapter.getCursor();
+                if (cursor != null && cursor.moveToPosition(position)) {
+                    //notify the activity the position clicked has changed using
+                    // the callback interface
+                    ((CallBack) getActivity())
+                            .onItemSelected(cursor.getString(COL_WEATHER_DATE));
+                }
+                //store the current position
+                mPosition = position;
+                Log.v("selected position", String.valueOf(mPosition));
+            }
+        });
+
+        // If there's instance state, mine it for useful information.
+        // The end-goal here is that the user never knows that turning their device sideways
+        // does crazy lifecycle related things.  It should feel like some stuff stretched out,
+        // or magically appeared to take advantage of room, but data or place in the app was never
+        // actually *lost*.
+
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            // The listview probably hasn't even been populated yet.  Actually perform the
+            // swapout in onLoadFinished.
+            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+        }
+        return rootView;
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        //initialize the loader as its lifecycle is bound to the activity not the fragment
+        getLoaderManager().initLoader(FORECAST_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    /**
+     * Fetch forecast from server
+     */
+    private void updateWeather() {
+        String location = Utility.getPreferredLocation(getActivity());
+        new FetchWeatherTask(getActivity()).execute(location);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //update the loader when the activity resumes
+        if (mLocation != null && !mLocation.equals(Utility.getPreferredLocation(getActivity()))) {
+            getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // When tablets rotate, the currently selected list item needs to be saved.
+        // When no item is selected, mPosition will be set to Listview.INVALID_POSITION,
+        // so check for that before storing.
+        if (mPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -164,7 +194,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         String sortOrder = WeatherEntry.COLUMN_DATETEXT + " ASC";
 
         mLocation = Utility.getPreferredLocation(getActivity());
-        Uri weatherForLocationUri = WeatherEntry.buildWeatherLocationWithStartDate(mLocation, startDate);
+        Uri weatherForLocationUri = WeatherEntry.buildWeatherLocationWithStartDate(
+                mLocation, startDate);
 
         //Now create and return a CursorLoader that will take care of
         //creating a cursor from the data being displayed
@@ -181,6 +212,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         //update the UI.called automatically when a Loader has finished its load
         mForecastAdapter.swapCursor(data);
+        if (mPosition != ListView.INVALID_POSITION) {
+            // If we don't need to restart the loader, and there's a desired position to restore
+            // to, do so now.
+            Log.v("position select", String.valueOf(mPosition));
+            mListView.smoothScrollToPosition(mPosition);
+        }
     }
 
     @Override
@@ -190,9 +227,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         mForecastAdapter.swapCursor(null);
     }
 
-
     /**
-     * Created by mikie on 1/27/15.
      * A callback interface that all activities containing this
      * fragment must implement.This mechanism allows activities to be
      * notified of item selections in order to handle the change
@@ -205,5 +240,4 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         public void onItemSelected(String date);
 
     }
-
 }

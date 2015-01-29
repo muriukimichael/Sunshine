@@ -57,7 +57,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
                 startActivity(intent);
                 return true;
             case R.id.action_map_preview:
-                showPrefLocation();
+                openPreferredLocationInMap();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -65,19 +65,28 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
 
     }
 
-    private void showPrefLocation() {
+    private void openPreferredLocationInMap() {
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String location = sharedPrefs.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+        SharedPreferences sharedPrefs =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        String location = sharedPrefs.getString(
+                getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
 
-        Uri geoLocation = Uri.parse("geo:0,0?").buildUpon().appendQueryParameter("q", location).build();
+        // Using the URI scheme for showing a location found on a map.  This super-handy
+        // intent can is detailed in the "Common Intents" page of Android's developer site:
+        // http://developer.android.com/guide/components/intents-common.html#Maps
+        Uri geoLocation = Uri.parse("geo:0,0?").buildUpon()
+                .appendQueryParameter("q", location)
+                .build();
 
         Intent mapIntent = new Intent(Intent.ACTION_VIEW);
         mapIntent.setData(geoLocation);
+
         if (mapIntent.resolveActivity(getPackageManager()) != null) {
             startActivity(mapIntent);
         } else {
-            Log.d(LOG_TAG, "Could not call " + location + " , no intent resolver present");
+            Log.d(LOG_TAG, "Couldn't call " + location + " , no recieving apps installed!");
         }
 
     }

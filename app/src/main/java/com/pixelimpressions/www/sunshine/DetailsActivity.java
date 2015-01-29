@@ -11,7 +11,6 @@ public class DetailsActivity extends ActionBarActivity {
 
     public static final String DATE_KEY = "forecast_date";
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,7 +19,8 @@ public class DetailsActivity extends ActionBarActivity {
         //as we replace it we must therefore ensure that the date String is sent
         //inside a bundle
         if (savedInstanceState == null) {
-
+            //Create the detail fragment and add it to the activity
+            //using a fragment transaction
             //get date from intent
             String date = getIntent().getStringExtra(DATE_KEY);
 

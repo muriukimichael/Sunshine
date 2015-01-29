@@ -8,18 +8,21 @@
     android:orientation="horizontal">
 
     <!--This layout is a two pane layout for the sunshine master/detail flow-->
+    <!--forecast fragment-->
     <fragment
+        android:id="@+id/fragment_forecast"
         android:name="com.pixelimpressions.www.sunshine.ForecastFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="2"
-        tools:layout="@layout/fragment_main" />
+        tools:layout="@android:layout/list_content" />
 
+    <!--FrameLayout to hold the dynamic fragments-->
     <FrameLayout
         android:id="@+id/weather_detail_container"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="4"></FrameLayout>
+        android:layout_weight="4" />
 
 
 </LinearLayout>
