@@ -19,14 +19,12 @@
             <TextView
                 android:id="@+id/details_tv_date"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Today" />
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/details_tv_date_month_day"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="June,24" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
@@ -40,36 +38,31 @@
             <TextView
                 android:id="@+id/details_tv_high"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="21" />
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/details_tv_low"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="8" />
+                android:layout_height="wrap_content" />
 
             <!--Humidity,Wind,Pressure-->
             <TextView
                 android:id="@+id/details_tv_humidity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Humidity: 32%" />
+                android:layout_marginTop="20dp" />
 
 
             <TextView
                 android:id="@+id/detais_tv_windspeed"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Wind:6Km/hr NW" />
+                android:layout_height="wrap_content" />
 
 
             <TextView
                 android:id="@+id/details_tv_pressure"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Pressure:1080Kpa" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
@@ -85,14 +78,12 @@
             <ImageView
                 android:id="@+id/details_icon"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/art_clear" />
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/details_tv_description"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Clear" />
+                android:layout_height="wrap_content" />
 
 
         </LinearLayout>

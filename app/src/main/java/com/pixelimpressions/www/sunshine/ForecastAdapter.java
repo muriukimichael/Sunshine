@@ -22,19 +22,31 @@ public class ForecastAdapter extends CursorAdapter {
     private static final int VIEW_TYPE_TODAY = 0;
     private static final int VIEW_TYPE_FUTURE_DAY = 1;
 
+    // Flag to determine if we want to use a separate view for "today".
+    private boolean mUseTodayLayout = true;
+
     public ForecastAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
+
+    //a public setter method to allow us to set whether to use the today layout or not
+    //we want to use the today layout on tablets only
+    public void setUseTodayLayout(boolean useTodayLayout) {
+        mUseTodayLayout = useTodayLayout;
+    }
+
+    /**
+     * This method tells us whether to use the Today list item or just populate the list
+     * using the normal list item layout.This depends on whether the the device is a phone or a
+     * tablet
+     *
+     * @param position
+     * @return
+     */
     @Override
     public int getItemViewType(int position) {
-        if (position == 0) {
-            //this is for today
-            return VIEW_TYPE_TODAY;
-        } else {
-            //every other layout
-            return VIEW_TYPE_FUTURE_DAY;
-        }
+        return (position == 0 && mUseTodayLayout) ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE_DAY;
     }
 
     @Override
@@ -50,11 +62,15 @@ public class ForecastAdapter extends CursorAdapter {
         int layoutId = -1;
 
         //inflate the multiple views for today and the rest of the days
-        if (viewType == VIEW_TYPE_TODAY) {
-            layoutId = R.layout.list_item_forecast_today;
-        } else {
-            layoutId = R.layout.list_item_forecast;
+        switch (viewType) {
+            case VIEW_TYPE_TODAY:
+                layoutId = R.layout.list_item_forecast_today;
+                break;
+            case VIEW_TYPE_FUTURE_DAY:
+                layoutId = R.layout.list_item_forecast;
+                break;
         }
+
         View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
         //call the view holder
         ViewHolder holder = new ViewHolder(view);

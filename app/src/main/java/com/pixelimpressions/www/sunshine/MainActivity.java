@@ -20,6 +20,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Bundle useToday = new Bundle();
         if (findViewById(R.id.weather_detail_container) != null) {
             //The default container view will be present only in the large screen layouts
             //(res/layout-sw600dp).if this view is present,then the activity should be in two pane
@@ -36,6 +37,12 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         } else {
             mTwoPane = false;
         }
+
+        //tell the adapter which list item to use based on the device
+        ForecastFragment forecastFragment = ((ForecastFragment)
+                getSupportFragmentManager().findFragmentById(R.id.fragment_forecast));
+        forecastFragment.setUseTodayLayout(!mTwoPane);
+
     }
 
 

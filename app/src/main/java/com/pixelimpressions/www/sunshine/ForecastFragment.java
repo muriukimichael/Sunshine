@@ -62,6 +62,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private int mPosition = ListView.INVALID_POSITION;
     private ListView mListView;
 
+    private boolean mUseTodayLayout;
+
 
     public ForecastFragment() {
 
@@ -104,7 +106,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
         // The ArrayAdapter will take data from a source and
         // use it to populate the ListView it's attached to.
         mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
@@ -142,6 +143,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             // swapout in onLoadFinished.
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
+        //wait for list to populate
+        mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
         return rootView;
     }
 
@@ -225,6 +228,23 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         //if the loader is reset,we don't have any data so we just pull the cursor to null
         // this removes any reference to data previously held
         mForecastAdapter.swapCursor(null);
+    }
+
+    /**
+     * This method tells the forecast adapter which list item to use for tablets
+     * This method could be called by onCreate before the adapter has been initialised
+     * so we make sure we check for null on the adapter
+     * We also initialize a member field to store the boolean just in case its called
+     * later or earlier than the oncreateView
+     *
+     * @param useTodayLayout
+     */
+
+    public void setUseTodayLayout(boolean useTodayLayout) {
+        mUseTodayLayout = useTodayLayout;
+        if (mForecastAdapter != null) {
+            mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
+        }
     }
 
     /**
