@@ -2,9 +2,27 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+        <!--Override the action bar style-->
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Sunshine</item>
     </style>
 
+    <!--Action Bar Style-->
+    <style name="ActionBar.Solid.Sunshine" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <!--override the background-->
+        <item name="background">@color/sunshine_blue</item>
+    </style>
+
+    <!--Main activity Theme-->
+    <style name="ForecastTheme" parent="AppTheme">
+        <item name="actionBarStyle">@style/ActionBar.Solid.Sunshine.NoTitle</item>
+    </style>
+
+    <!--MainActivity ActionBar Style-->
+    <style name="ActionBar.Solid.Sunshine.NoTitle" parent="ActionBar.Solid.Sunshine">
+        <!--we override this to show logo-->
+        <item name="displayOptions">useLogo|showHome</item>
+        <item name="logo">@drawable/ic_logo</item>
+    </style>
 
     <!--We don't need a choiceMode in single pane Mode-->
     <style name="ForecastListStyle">
