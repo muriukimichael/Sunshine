@@ -25,7 +25,7 @@
             android:fontFamily="sans-serif-condensed"
             android:text="Today,June 18"
             android:textAppearance="?android:textAppearanceLarge"
-            android:textColor="@color/text_white" />
+            android:textColor="@color/white" />
 
 
         <TextView
@@ -44,7 +44,7 @@
             android:layout_marginLeft="8dp"
             android:fontFamily="sans-serif-light"
             android:text="12"
-            android:textColor="@color/text_white"
+            android:textColor="@color/white"
             android:textSize="36sp" />
 
     </LinearLayout>
@@ -73,7 +73,7 @@
             android:fontFamily="sans-serif-condensed"
             android:text="clear"
             android:textAppearance="?android:textAppearanceLarge"
-            android:textColor="@color/text_white" />
+            android:textColor="@color/white" />
 
     </LinearLayout>
 
