@@ -35,7 +35,8 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
             android:text="Saturday"
-            android:textAppearance="?android:textAppearanceLarge" />
+            android:textColor="@color/black"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/list_item_forecast_textview"
