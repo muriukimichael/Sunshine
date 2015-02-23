@@ -1,8 +1,10 @@
 package com.pixelimpressions.www.sunshine.service;
 
 import android.app.IntentService;
+import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -300,6 +302,18 @@ public class SunshineService extends IntentService {
             ContentValues[] cvArray = new ContentValues[cVVector.size()];
             cVVector.toArray(cvArray);
             getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI, cvArray);
+        }
+    }
+
+    //this will handle waking the service automatically
+    static public class AlarmReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Intent serviceIntent = new Intent(context, SunshineService.class);
+            serviceIntent.putExtra(LOCATION_QUERY_EXTRA,
+                    intent.getStringExtra(LOCATION_QUERY_EXTRA));
+            context.startService(serviceIntent);
         }
     }
 
