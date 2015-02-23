@@ -242,6 +242,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     data.getColumnIndex(WeatherEntry.COLUMN_SHORT_DESC));
             mWeatherDesc.setText(weatherDescription);
 
+            //implements accessibility
+            mIconView.setContentDescription(weatherDescription);
+
             //format temperature values and display
             boolean isMetric = Utility.isMetric(getActivity());
 

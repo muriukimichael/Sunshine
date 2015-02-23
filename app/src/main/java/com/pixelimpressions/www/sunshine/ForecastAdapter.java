@@ -120,6 +120,9 @@ public class ForecastAdapter extends CursorAdapter {
         //Find the textview and set weather forecast on it.
         viewHolder.descriptionView.setText(description);
 
+        //handle accessibility
+        viewHolder.iconView.setContentDescription(description);
+
         //Read user preference for metric or imperial temperature units
         boolean isMetric = Utility.isMetric(context);
 
