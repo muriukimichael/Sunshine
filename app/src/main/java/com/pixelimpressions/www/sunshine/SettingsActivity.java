@@ -8,6 +8,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
 import com.pixelimpressions.www.sunshine.data.WeatherContract;
+import com.pixelimpressions.www.sunshine.service.SunshineService;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings.
@@ -65,9 +66,10 @@ public class SettingsActivity extends PreferenceActivity
             //if location has changed
             if (preference.getKey().equals(getString(R.string.pref_location_key))) {
                 //update the weather from the database
-                FetchWeatherTask weatherTask = new FetchWeatherTask(this);
                 String location = value.toString();
-                weatherTask.execute(location);
+                Intent intent = new Intent(this, SunshineService.class);
+                intent.putExtra(SunshineService.LOCATION_QUERY_EXTRA, location);
+                startService(intent);
             } else {
                 //notify code that weather may be impacted
                 getContentResolver().notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null);

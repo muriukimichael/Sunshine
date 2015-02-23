@@ -1,5 +1,6 @@
 package com.pixelimpressions.www.sunshine;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.widget.ListView;
 import com.pixelimpressions.www.sunshine.data.WeatherContract;
 import com.pixelimpressions.www.sunshine.data.WeatherContract.LocationEntry;
 import com.pixelimpressions.www.sunshine.data.WeatherContract.WeatherEntry;
+import com.pixelimpressions.www.sunshine.service.SunshineService;
 
 import java.util.Date;
 
@@ -91,9 +93,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_refresh:
-                //new FetchWeatherTask().execute(String.valueOf(94043));
-                //new FetchWeatherTask().execute("Nairobi,Kenya");
-                //updated to use the user location setting
                 updateWeather();
                 return true;
             default:
@@ -159,8 +158,10 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
      * Fetch forecast from server
      */
     private void updateWeather() {
-        String location = Utility.getPreferredLocation(getActivity());
-        new FetchWeatherTask(getActivity()).execute(location);
+        Intent intent = new Intent(getActivity(), SunshineService.class);
+        intent.putExtra(SunshineService.LOCATION_QUERY_EXTRA,
+                Utility.getPreferredLocation(getActivity()));
+        getActivity().startService(intent);
     }
 
     @Override
