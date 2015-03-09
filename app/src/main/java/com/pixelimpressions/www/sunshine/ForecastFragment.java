@@ -1,13 +1,8 @@
 package com.pixelimpressions.www.sunshine;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -25,7 +20,7 @@ import android.widget.ListView;
 import com.pixelimpressions.www.sunshine.data.WeatherContract;
 import com.pixelimpressions.www.sunshine.data.WeatherContract.LocationEntry;
 import com.pixelimpressions.www.sunshine.data.WeatherContract.WeatherEntry;
-import com.pixelimpressions.www.sunshine.service.SunshineService;
+import com.pixelimpressions.www.sunshine.sync.SunshineSyncAdapter;
 
 import java.util.Date;
 
@@ -163,7 +158,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
      */
     private void updateWeather() {
         //This section schedules a non repeating alarm to wake device and fire after five seconds
-        Intent alarmIntent = new Intent(getActivity(), SunshineService.AlarmReceiver.class);
+
+        /*Intent alarmIntent = new Intent(getActivity(), SunshineService.AlarmReceiver.class);
         alarmIntent.putExtra(SunshineService.LOCATION_QUERY_EXTRA,
                 Utility.getPreferredLocation(getActivity()));
         //its a one time thing
@@ -173,7 +169,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         AlarmManager alarmManager = (AlarmManager) getActivity()
                 .getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + 5 * 1000, pi);
+                SystemClock.elapsedRealtime() + 5 * 1000, pi);*/
+        SunshineSyncAdapter.syncImmediately(getActivity().getApplicationContext());
     }
 
     @Override
